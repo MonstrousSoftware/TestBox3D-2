@@ -10,9 +10,12 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.xpenatan.box3d.*;
+import com.github.xpenatan.box3d.gdx.GdxBox3DConverter;
 import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
 
 
@@ -22,11 +25,15 @@ public class Main extends ApplicationAdapter {
     private Model modelGround, modelBox;
     private ModelBatch modelBatch;
     private Array<ModelInstance> instances;
+    private ModelInstance cubeInstance;
     private PerspectiveCamera cam;
     private CameraInputController camController;
     private Environment environment;
     private final Color backgroundColor = new Color(0.15f, 0.15f, 0.2f, 1f);
     private B3World world;
+    private B3Body cubeBody;
+    private final Vector3 cubePos = new Vector3();
+    private final Quaternion cubeQuat = new Quaternion();
 
     @Override
     public void create() {
@@ -62,7 +69,8 @@ public class Main extends ApplicationAdapter {
         modelBox = mb.createBox(1, 1, 1,
             new Material(ColorAttribute.createDiffuse(Color.BLUE)),
             VertexAttributes.Usage.Position | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal);
-        instances.add( new ModelInstance(modelBox, 0, 4f, 0) );
+        cubeInstance = new ModelInstance(modelBox, 0, 4f, 0);
+        instances.add( cubeInstance );
 
 
         // define some lighting
@@ -80,24 +88,54 @@ public class Main extends ApplicationAdapter {
         worldDef.SetGravity(gravity);
         world = new B3World(worldDef);
 
-//        B3BodyDef groundBodyDef = new B3BodyDef();
-//        B3Vec3 groundPos = new B3Vec3(0, -10f, 0);
-//        //groundPos.Set(0f, -10f, 0f);
-//        float gy = groundPos.GetY();
-//        System.out.println("ground y = "+gy);
-//        groundBodyDef.SetPosition(groundPos);
-//
-//        B3Body groundBody = world.CreateBody(groundBodyDef);
-//
-//        B3Hull groundBox = B3Hull.CreateBox(50f, 10f, 50f);
-//        B3ShapeDef groundShapeDef = new B3ShapeDef();
-//        groundBody.CreateHullShape(groundShapeDef, groundBox);
+        // Create Ground body
+        B3BodyDef groundBodyDef = new B3BodyDef();
+        B3Vec3 groundPos = new B3Vec3(0, -10f, 0);
+        //groundPos.Set(0f, -10f, 0f);
+        float gy = groundPos.GetY();
+        System.out.println("ground y = "+gy);
+        groundBodyDef.SetPosition(groundPos);
 
+        B3Body groundBody = world.CreateBody(groundBodyDef);
+
+        B3Hull groundBox = B3Hull.CreateBox(50f, 10f, 50f);
+        B3ShapeDef groundShapeDef = new B3ShapeDef();
+        groundBody.CreateHullShape(groundShapeDef, groundBox);
+
+        // Create a dynamic body
+        B3BodyDef cubeBodyDef = new B3BodyDef();
+        cubeBodyDef.SetType(2); // dynamic body
+        cubeBodyDef.SetPosition(new B3Vec3(0, 4f, 0));
+        cubeBody = world.CreateBody(cubeBodyDef);
+
+        B3Hull cubeBox = B3Hull.CreateCube(1f);
+        B3ShapeDef cubeShapeDef = new B3ShapeDef();
+        cubeShapeDef.SetDensity(1.0f);
+        cubeShapeDef.GetBaseMaterial().SetFriction(0.3f);
+        cubeShapeDef.GetBaseMaterial().SetRestitution(0.9f);
+        cubeBody.CreateHullShape(cubeShapeDef, cubeBox);
     }
 
     @Override
     public void render() {
         camController.update();
+
+        float timeStep = 1f/60f;
+        int subStepCount = 4;
+
+        world.Step(timeStep, subStepCount);
+
+        B3Vec3 position = cubeBody.GetPosition();
+        B3Quat rotation = cubeBody.GetRotation();
+
+        // convert Box3D values to LibGDX values
+        GdxBox3DConverter.toGdx(position, cubePos);
+        System.out.println("Position: "+cubePos);
+
+        GdxBox3DConverter.toGdx(rotation, cubeQuat);
+
+        // set transform of model instance to match dynamic object
+        cubeInstance.transform.set(cubePos, cubeQuat);
 
         ScreenUtils.clear(backgroundColor, true);
         modelBatch.begin(cam);

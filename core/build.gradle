@@ -7,6 +7,7 @@ dependencies {
   // for jBox3d
   implementation("com.github.xpenatan.jBox3D:core:$jbox3dVersion")
   //runtimeOnly("com.github.xpenatan.jBox3D:desktop-jni:$jbox3dVersion")
+  implementation("com.github.xpenatan.jBox3D:gdx-gl:$jbox3dVersion")
 
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
