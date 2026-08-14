@@ -20,6 +20,8 @@ import com.github.xpenatan.jParser.loader.JParserLibraryLoaderListener;
 
 
 // The Box3D code follows example from https://github.com/erincatto/box3d/blob/main/docs/hello.md
+// We show a single cube dropping on a ground plane
+
 
 public class Main extends ApplicationAdapter {
     private Model modelGround, modelBox;
@@ -91,7 +93,6 @@ public class Main extends ApplicationAdapter {
         // Create Ground body
         B3BodyDef groundBodyDef = new B3BodyDef();
         B3Vec3 groundPos = new B3Vec3(0, -10f, 0);
-        //groundPos.Set(0f, -10f, 0f);
         float gy = groundPos.GetY();
         System.out.println("ground y = "+gy);
         groundBodyDef.SetPosition(groundPos);
@@ -104,15 +105,20 @@ public class Main extends ApplicationAdapter {
 
         // Create a dynamic body
         B3BodyDef cubeBodyDef = new B3BodyDef();
-        cubeBodyDef.SetType(2); // dynamic body
-        cubeBodyDef.SetPosition(new B3Vec3(0, 4f, 0));
+        cubeBodyDef.SetType(2); // 2 = dynamic body
+        cubeBodyDef.SetPosition(new B3Vec3(0, 8f, 0));
         cubeBody = world.CreateBody(cubeBodyDef);
 
         B3Hull cubeBox = B3Hull.CreateCube(1f);
         B3ShapeDef cubeShapeDef = new B3ShapeDef();
-        cubeShapeDef.SetDensity(1.0f);
-        cubeShapeDef.GetBaseMaterial().SetFriction(0.3f);
-        cubeShapeDef.GetBaseMaterial().SetRestitution(0.9f);
+        cubeShapeDef.SetDensity(0.1f);
+        B3SurfaceMaterial material = new B3SurfaceMaterial();
+        material.SetFriction(0.3f);
+        material.SetRestitution(0.9f);
+        cubeShapeDef.SetBaseMaterial(material);
+        // Note: the following doesn't work:
+        //        cubeShapeDef.GetBaseMaterial().SetFriction(0.1f);
+
         cubeBody.CreateHullShape(cubeShapeDef, cubeBox);
     }
 
@@ -130,7 +136,7 @@ public class Main extends ApplicationAdapter {
 
         // convert Box3D values to LibGDX values
         GdxBox3DConverter.toGdx(position, cubePos);
-        System.out.println("Position: "+cubePos);
+        //System.out.println("Position: "+cubePos);
 
         GdxBox3DConverter.toGdx(rotation, cubeQuat);
 

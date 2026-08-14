@@ -2,7 +2,7 @@
 
 Second attempt at Box3D test via [JBox3d](https://github.com/xpenatan/jBox3D) .  
 Now with only the desktop platform (no teavm) and no other dependencies.
-(Not working)
+
 
 ## Platforms
 
@@ -48,8 +48,6 @@ Call JBox3DLoader.init() explicitly to load the native library on startup.
 Only works if this dependency is defined in build.gradle: runtimeOnly("com.github.xpenatan.jBox3D:desktop-jni:$jbox3dVersion") otherwise it cannot find the native
 libraries.
 
-Problem: dummy Java methods are called instead of JNI native calls. So B3Vec3.getY() always returns 0 regardless how the value was set and other methods return null.
-Class path problem?
 
 
 
