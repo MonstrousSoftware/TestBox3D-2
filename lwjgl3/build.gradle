@@ -33,6 +33,7 @@ dependencies {
   implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
   implementation project(':core')
 
+  // for Box3D
   runtimeOnly("com.github.xpenatan.jBox3D:shared-jni:$jbox3dVersion")
   runtimeOnly("com.github.xpenatan.jBox3D:desktop-jni:$jbox3dVersion")
 
